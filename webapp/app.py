@@ -106,6 +106,11 @@ tbody tr:nth-child(even) td:not(.rn){background:#fafbfc}tbody tr:hover td:not(.r
 .dl{border:1px solid var(--bd);border-radius:14px;padding:18px;background:#fff;display:flex;flex-direction:column;gap:8px}
 .dl h3{margin:0;font-size:17px}.dl p{margin:0 0 8px;color:var(--mut);flex:1}
 footer{color:var(--mut);text-align:center;padding:26px 0 40px;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:860px){.two{grid-template-columns:1fr}}
+.box{border:1.5px dashed #cbd5e1;border-radius:14px;padding:16px;background:#f8fafc;display:flex;flex-direction:column;gap:8px;position:relative}
+.box b{font-size:17px}.box .tag{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700}
+.box input[type=file]{background:#fff;margin-top:auto}
+.go{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px}
 </style></head><body>
 <div class=nav><div class=wrap><div class=logo>
 <svg width=30 height=30 viewBox="0 0 100 100"><circle cx=50 cy=50 r=46 fill="#f59e0b"/><circle cx=50 cy=50 r=32 fill="#0b2239"/><circle cx=50 cy=50 r=14 fill="#cbd5e1"/><circle cx=50 cy=50 r=5 fill="#0b2239"/></svg>
@@ -126,10 +131,13 @@ Tyre Mapper</div><small>Supplier sheet &rarr; TyresCart format</small></div></di
 <circle cx=150 cy=150 r=18 fill="#f59e0b"/><circle cx=150 cy=150 r=7 fill="#0b2239"/></svg></div></div></section>
 
 <div class=wrap>
-<div class="card up"><form method=post action="/" enctype=multipart/form-data class=drop>
-<div class=ico><svg width=30 height=30 viewBox="0 0 24 24" fill=none stroke="#d97706" stroke-width=2 stroke-linecap=round stroke-linejoin=round><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg></div>
-<div class=txt><b>Upload supplier sheet</b><div class=mut>.xlsx, .xls or .csv. The sheet needs a tyre description column such as <i>Description</i> or <i>ITDESC</i>. Stock, price and origin columns are carried along if present.</div></div>
-<input type=file name=file accept=".xlsx,.xls,.csv" required><button><svg width=16 height=16 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=3><path d="M5 12h14M13 6l6 6-6 6"/></svg> Upload &amp; convert</button></form>
+<div class="card up"><form method=post action="/" enctype=multipart/form-data id=upf>
+<div class=two>
+<div class=box><div class=tag>1</div><b>TyresCart sheet</b><div class=mut>Your latest TyresCart catalogue / stock (.xlsx, .xls or .csv). Needs columns like <i>sku, mgs_brand, pattern, tyre_size, load_index, year</i>.</div>
+<input type=file name=tyrescart_file accept=".xlsx,.xls,.csv" required></div>
+<div class=box><div class=tag>2</div><b>Supplier sheet</b><div class=mut>The supplier price / stock list (.xlsx, .xls or .csv) with a tyre description column such as <i>Description</i>, <i>ITDESC</i> or <i>title</i>.</div>
+<input type=file name=file accept=".xlsx,.xls,.csv" required></div></div>
+<div class=go><span class=mut>Upload both sheets every time. They are compared and nothing is kept between visits.</span><button><svg width=16 height=16 viewBox="0 0 24 24" fill=none stroke=currentColor stroke-width=3><path d="M5 12h14M13 6l6 6-6 6"/></svg> Compare sheets</button></div></form>
 {% if error %}<div class=err>{{error}}</div>{% endif %}</div>
 
 {% if not stats %}
@@ -142,7 +150,7 @@ Tyre Mapper</div><small>Supplier sheet &rarr; TyresCart format</small></div></di
 
 {% if stats %}
 <div class=card>
-<div class=file><span class=name>{{filename}}</span><span class=pill>{{stats.sheet}}</span><span class=pill>{{stats.rows}} rows</span><span class=pill>Pitstop Arabia vocabulary on</span></div>
+<div class=file><span class=name>{{filename}}</span><span class=pill>{{stats.sheet}}</span><span class=pill>{{stats.rows}} supplier rows</span><span class=pill>vs TyresCart: {{stats.tc_name}} ({{stats.tc_rows}} tyres)</span></div>
 <div class=acts><a class=btn href="/download/{{rid}}/tyrescart">&#8681; Download TyresCart sheet</a>
 <a class="btn dk" href="/download/{{rid}}">&#8681; Full result (3 sheets)</a>
 <a class="btn gh" href="/download/{{rid}}/original">&#8681; Uploaded sheet</a>
@@ -158,7 +166,7 @@ Tyre Mapper</div><small>Supplier sheet &rarr; TyresCart format</small></div></di
 <div class=mut style="font-size:13px;margin-top:6px">{{pct1+pct2}}% of rows matched to a TyresCart SKU</div></div>
 
 <div class=card>
-<div class=tabs><button id=tb1 type=button class=on>TyresCart format (converted)</button><button id=tb2 type=button>Uploaded sheet (original)</button><button id=tb3 type=button>Reference (TyresCart catalogue)</button><button id=tb4 type=button>Download</button></div>
+<div class=tabs><button id=tb1 type=button class=on>TyresCart format (converted)</button><button id=tb2 type=button>Uploaded sheet (original)</button><button id=tb3 type=button>Reference (your TyresCart sheet)</button><button id=tb4 type=button>Download</button></div>
 <div id=v1><div class=bar>
 <select id=st><option value="">All rows</option><option>MATCHED (Size1)</option><option>MATCHED (Size2)</option><option>NO MATCH</option></select>
 <input type=search id=q placeholder="Search any text..."><span class=mut id=cnt></span>{% if stats.shown < stats.rows %}<span class=mut>(first {{stats.shown}} of {{stats.rows}} rows shown; downloads have all rows)</span>{% endif %}</div>
@@ -179,7 +187,7 @@ const V=['v1','v2','v3','v4'].map(i=>document.getElementById(i)),B=['tb1','tb2',
 function show(i){V.forEach((v,j)=>{v.style.display=i===j?'':'none';B[j].classList.toggle('on',i===j)});if(i===2&&!rt.tHead.rows.length)loadRef()}
 B.forEach((b,i)=>b.onclick=()=>show(i));
 const rt=document.getElementById('rt'),rq=document.getElementById('rq'),rcnt=document.getElementById('rcnt');let tm;
-async function loadRef(){const d=await (await fetch('/reference?q='+encodeURIComponent(rq.value))).json();
+async function loadRef(){const d=await (await fetch('/reference?rid={{rid}}&q='+encodeURIComponent(rq.value))).json();
  const esc=x=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;');
  rt.tHead.innerHTML='<tr><th class=rn></th>'+d.cols.map(c=>'<th>'+c+'</th>').join('')+'</tr>';
  rt.tBodies[0].innerHTML=d.rows.map((r,i)=>'<tr><td class=rn>'+(i+1)+'</td>'+r.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('');
@@ -194,7 +202,7 @@ document.querySelectorAll('#t, #v2 table').forEach(t=>{
 st.onchange=f;q.oninput=f;f();
 </script>
 {% endif %}
-<footer>Tyre Mapper &middot; reads the description column only &middot; matches by Size 1 / Size 2 key + full display name</footer>
+<footer>Tyre Mapper &middot; upload the TyresCart sheet + a supplier sheet &middot; matches by Size 1 / Size 2 key + full display name</footer>
 </div></body></html>"""
 
 
@@ -242,30 +250,84 @@ def load_supplier(file):
                      + ", ".join(xl.sheet_names))
 
 
+TC_REQUIRED = ["sku", "mgs_brand", "pattern", "tyre_size", "load_index", "year"]
+TC_OPTIONAL = ["display_name", "runflat", "oem_tyres", "name", "price", "country", "ev_tyre", "tyres_category",
+               "warranty_period", "construction", "width", "height", "rim"]
+
+
+def _tc_clean(df):
+    df = df.copy()
+    df.columns = [str(c).strip().lower() for c in df.columns]
+    return df
+
+
+def load_tyrescart(file):
+    """Read the uploaded TyresCart sheet (any sheet/header row that has the TyresCart columns)."""
+    name = file.filename.lower()
+    cands = []
+    if name.endswith(".csv"):
+        raw = file.read()
+        for enc in ("utf-8-sig", "utf-16", "cp1252", "latin-1"):
+            try:
+                text = raw.decode(enc)
+                break
+            except UnicodeError:
+                continue
+        for sep in (None, ",", ";", "\t"):
+            try:
+                cands.append(pd.read_csv(io.StringIO(text), sep=sep, engine="python", on_bad_lines="skip"))
+                break
+            except Exception:
+                continue
+    else:
+        xl = pd.ExcelFile(file)
+        for sh in sorted(xl.sheet_names, key=lambda n: n.lower() != "tyrescart"):  # prefer the "TyresCart" sheet
+            for hdr in range(0, 6):
+                try:
+                    cands.append(xl.parse(sh, header=hdr))
+                except Exception:
+                    break
+    for df in cands:
+        df = _tc_clean(df)
+        if all(c in df.columns for c in TC_REQUIRED):
+            for c in TC_OPTIONAL:
+                if c not in df.columns:
+                    df[c] = None
+            df = df.dropna(subset=["sku"]).reset_index(drop=True)
+            df["year"] = pd.to_numeric(df["year"], errors="coerce").astype("Int64")
+            return df
+    raise ValueError("the TyresCart sheet needs these columns: " + ", ".join(TC_REQUIRED))
+
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "GET":
         return render_template_string(PAGE)
     file = request.files.get("file")
+    tfile = request.files.get("tyrescart_file")
+    if not file or not file.filename or not tfile or not tfile.filename:
+        return render_template_string(PAGE, error="Please add both sheets: the TyresCart sheet and the supplier sheet.")
     try:
+        TC = load_tyrescart(tfile)
         L, sheet = load_supplier(file)
         for c in OPTIONAL:
             if c not in L.columns:
                 L[c] = None
         L = L.dropna(subset=["Description"]).reset_index(drop=True)
-        out, work, stats = convert(L, CATALOGUE, VOCAB)
+        out, work, stats = convert(L, TC, VOCAB)
     except Exception as e:  # show a readable error instead of a 500 page
         return render_template_string(PAGE, error=f"Could not process file: {e}")
     rid = uuid.uuid4().hex[:12]
-    RESULTS[rid] = (out, work, stats, file.filename, L)
+    RESULTS[rid] = (out, work, stats, file.filename, L, TC)
     stats["sheet"] = sheet
+    stats["tc_name"], stats["tc_rows"] = tfile.filename, len(TC)
     CAP = 3000  # keep the browser fast; downloads always contain every row
     fmt = lambda d: d.head(CAP).astype(object).where(d.head(CAP).notna(), "").astype(str).values.tolist()
     stats["shown"] = min(CAP, len(out))
     n = max(stats["rows"], 1)
     pct1, pct2 = round(100 * stats["size1"] / n, 1), round(100 * stats["size2"] / n, 1)
     return render_template_string(
-        PAGE, stats=stats, rid=rid, filename=file.filename, pct1=pct1, pct2=pct2, pct0=round(100 - pct1 - pct2, 1),
+        PAGE, stats=stats, rid=rid, filename=file.filename, rid_tc=rid, pct1=pct1, pct2=pct2, pct0=round(100 - pct1 - pct2, 1),
         cols=show_cols(out), rows=fmt(out[show_cols(out)]),
         ocols=list(L.columns), orows=fmt(L))
 
@@ -274,7 +336,7 @@ def index():
 def download(rid):
     if rid not in RESULTS:
         abort(404)
-    out, work, _, fn, _L = RESULTS[rid]
+    out, work, _, fn, _L, _T = RESULTS[rid]
     buf = io.BytesIO()
     write_excel(out, work, buf)
     buf.seek(0)
@@ -287,8 +349,8 @@ def download_stock(rid):
     """Full TyresCart list compared with the uploaded supplier sheet."""
     if rid not in RESULTS:
         abort(404)
-    out, _w, _s, fn, L = RESULTS[rid]
-    summary, res, un = build_stock_view(out, CATALOGUE, len(L))
+    out, _w, _s, fn, L, TC = RESULTS[rid]
+    summary, res, un = build_stock_view(out, TC, len(L))
     buf = io.BytesIO()
     write_stock_excel(summary, res, un, buf)
     buf.seek(0)
@@ -300,7 +362,7 @@ def download_kind(rid, kind):
     """kind = tyrescart (clean TyresCart-format sheet only) | original (uploaded sheet)"""
     if rid not in RESULTS:
         abort(404)
-    out, _w, _s, fn, L = RESULTS[rid]
+    out, _w, _s, fn, L, _T = RESULTS[rid]
     df = out.drop(columns=[c for c in out.columns if c.startswith(("supplier_", "tyrescart_")) or c in
                            ("match_status", "review_note", "price_difference")]) if kind == "tyrescart" else L
     buf = io.BytesIO()
@@ -311,24 +373,31 @@ def download_kind(rid, kind):
 
 @app.route("/remove/<rid>", methods=["POST"])
 def remove(rid):
-    RESULTS.pop(rid, None)  # forget the old uploaded file and its results
+    RESULTS.pop(rid, None)
+    _HAY.pop(rid, None)  # forget the old uploaded file and its results
     return redirect("/")
+
+
+_HAY = {}
 
 
 @app.route("/reference")
 def reference():
-    """TyresCart catalogue rows for the Reference tab (searchable, capped for speed)."""
+    """Rows of the TyresCart sheet that was uploaded with this result (searchable, capped for speed)."""
+    rid = request.args.get("rid", "")
+    if rid not in RESULTS:
+        return {"cols": [], "rows": [], "total": 0}
+    TC = RESULTS[rid][5]
     q = request.args.get("q", "").strip().lower()
-    cols = ["sku", "mgs_brand", "pattern", "oem_tyres", "runflat", "ev_tyre", "tyre_size", "load_index",
+    want = ["sku", "mgs_brand", "pattern", "oem_tyres", "runflat", "ev_tyre", "tyre_size", "load_index",
             "year", "country", "tyres_category", "price", "name"]
-    df = CATALOGUE[cols]
+    cols = [c for c in want if c in TC.columns]
+    df = TC[cols]
     if q:
-        global _hay
-        if _hay is None:
-            _hay = CATALOGUE[cols].fillna("").astype(str).apply(" ".join, axis=1).str.lower()
-        df = df[_hay.loc[df.index].str.contains(q, regex=False)]
-    total = len(df)
-    return {"cols": cols, "rows": df.head(300).fillna("").astype(str).values.tolist(), "total": total}
+        if rid not in _HAY:
+            _HAY[rid] = df.fillna("").astype(str).apply(" ".join, axis=1).str.lower()
+        df = df[_HAY[rid].loc[df.index].str.contains(q, regex=False)]
+    return {"cols": cols, "rows": df.head(300).fillna("").astype(str).values.tolist(), "total": len(df)}
 
 
 if __name__ == "__main__":
