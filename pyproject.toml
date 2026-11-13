@@ -1,2 +1,14 @@
+[project]
+name = "mapping-ai-agent"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "Flask==3.1.3",
+    "pandas==3.0.3",
+    "numpy==2.4.6",
+    "openpyxl==3.1.5",
+    "xlrd==2.0.2",
+]
+
 [tool.vercel]
 entrypoint = "webapp.app:app"
